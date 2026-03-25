@@ -1,10 +1,20 @@
 from abc import ABC, abstractmethod
-from typing import  Any, Dict
+from typing import  Any, Dict, Enum
 from datetime import datetime
+from functools import wraps
+
+
+class StorageType (Enum):
+    LOCAL = "local"
+    FTP = "ftp"
+    YA_DISK = "yandex_disk"
 
 
 class BaseMetaData:
     """Базовый класс для реализаци методов работы с метаданными
+
+    __init__
+        В качесте параметров принимает любое колличество параметров метаданных
 
     Methods:
 
@@ -14,13 +24,13 @@ class BaseMetaData:
 
     """
 
-    def __init__(self, *args, **kwargs):
-        """Набор атрибутов для всех типов медиа файлов разный"""
+    def __init__(self, **kwargs):
+
         self._data = Dict[kwargs.copy()]
 
 
     def add_metadata(self, name: str, data: Any) -> bool:
-        """Задать метаданные для конкретного файла"""
+        """Задать метаданные для конкретного типа файла"""
         self._data[name] = data
 
 
@@ -59,34 +69,85 @@ class BaseMedia(ABC):
         delete
     """
 
-    def __init__ (self, file_name : str, size : int, actor : str, metadata: BaseMetaData = None):
+    def __init__ (self, file_name : str, size : int, actor : str, metadata: BaseMetaData = None, type : StorageType = None):
+        """_summary_
+
+        Args:
+            file_name (str): наименование файла
+            size (int): размер в байтах
+            actor (str): создатель файла
+            metadata (BaseMetaData, optional): Набор метаданных конкретного типа файла. Defaults to None.
+            type (StorageType): Способ хранения файла
+        """
+
         self._file_name = file_name
         self._size = size
         self._actor = actor
         self._date = datetime.now()
         self._metadata = metadata
+        self._type = type
 
 
     def set_metadata(self, data :BaseMetaData) -> None:
-        """Коныертировать в другой формат"""
+        """_summary_
+
+        Args:
+            data (BaseMetaData): _description_
+
+        Returns:
+            _type_: _description_
+        """
         return self._metadata
     
 
     def get_metadata(self) -> BaseMetaData:
-        """Коныертировать в другой формат"""
+        """_summary_
+
+        Returns:
+            BaseMetaData: _description_
+        """
         return self._metadata
 
 
     @abstractmethod
-    def convert(self):
-        """Коныертировать в другой формат"""
+    def convert(self, type: ыек) -> bool:
+        """Коныертировать в другой формат
+
+            Для каждого типа реализовано открытие разными утилитами
+
+            В качестве типа можно так же создать интерфейс BaseConvertType для наследования форматов
+            в зависимости от типа файла, но в нашем случае будем принимать просто строку и валидировать значение в
+            классах
+        """
+        pass
+
+
+class BaseStorage(ABC):
+
+    """_summary_
+        Абстрактный класс записи/чтения фвйлов
+    """
+
+    @abstractmethod
+    def read (self, file : BaseMedia) -> None:
+        """_summary_
+
+        Args:
+            file (BaseMedia): Объект файла для получение его данных из storage
+        """
         pass
 
 
     @abstractmethod
-    def read(self):
-        """Открыть и прочитать. 
-        
-            Для каждого типа реализовано открытие разными утилитами"""
-        pass
+    def write (self, path : str) -> bool:
+        """_summary_
 
+        Args:
+            path (str): 
+                local - локального путь к файлу. 
+                ftp, cloud - url 
+
+        Returns:
+            bool: _description_
+        """
+        pass
