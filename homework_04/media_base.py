@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import  Any, Dict, Enum
+from typing import  Any, Dict
+from enum import  Enum
 from datetime import datetime
 from functools import wraps
 
@@ -24,9 +25,8 @@ class BaseMetaData:
 
     """
 
-    def __init__(self, **kwargs):
-
-        self._data = Dict[kwargs.copy()]
+    def __init__(self):
+        self._data = {}
 
 
     def add_metadata(self, name: str, data: Any) -> bool:
@@ -93,11 +93,7 @@ class BaseMedia(ABC):
 
         Args:
             data (BaseMetaData): _description_
-
-        Returns:
-            _type_: _description_
         """
-        return self._metadata
     
 
     def get_metadata(self) -> BaseMetaData:
@@ -107,10 +103,20 @@ class BaseMedia(ABC):
             BaseMetaData: _description_
         """
         return self._metadata
+    
+    def get_metadata_value(self, key: str) -> BaseMetaData:
+        """_summary_
+
+        todo: Производить валидацию полученного ключа
+
+        Returns:
+            BaseMetaData: _description_
+        """
+        return self._metadata.get_metadata_value(key)
 
 
     @abstractmethod
-    def convert(self, type: ыек) -> bool:
+    def convert(self, type: str) -> bool:
         """Коныертировать в другой формат
 
             Для каждого типа реализовано открытие разными утилитами
@@ -128,12 +134,18 @@ class BaseStorage(ABC):
         Абстрактный класс записи/чтения фвйлов
     """
 
+
+    def __init__(self):
+        pass
+
+
     @abstractmethod
-    def read (self, file : BaseMedia) -> None:
+    def read (self, file : BaseMedia) ->None:
         """_summary_
 
         Args:
             file (BaseMedia): Объект файла для получение его данных из storage
+
         """
         pass
 
